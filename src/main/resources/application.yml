@@ -1,0 +1,83 @@
+spring:
+  profiles:
+    active: dev
+
+  jpa:
+    show-sql: true
+    database: mysql
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  datasource:
+    hikari:
+      pool-name: HikariCP
+      connectionTestQuery : SELECT 1
+      connection-timeout: 30000
+
+  hateoas:
+    use-hal-as-default-json-media-type: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://localhost:3307/user
+    username: root
+    password: 1111
+    hikari:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      maximum-pool-size: 1
+server:
+  port: 8081
+
+logging:
+  file:
+    path: ./log
+    name: ./log/main.log
+  pattern:
+    file: '%d{yyyy-MM-dd HH:mm:ss} %clr([%thread]){magenta}  %clr(%5p) %logger{36} - %msg%n'
+    console: '%d{yyyy-MM-dd HH:mm:ss} %clr([%thread]){magenta}  %clr(%5p) %logger{36} - %msg%n'
+  level:
+    root: debug
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+      springframework:
+        web: DEBUG
+        security: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    hikari:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      # https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
+      # The calculation of pool size in order to avoid deadlock is a fairly simple resource allocation formula:
+      # pool size = Tn * (Cm - 1) + 1
+      # core = 1, thread = 2 => 2 * (1-1) + 1 = 1
+      maximum-pool-size: 1
+
+logging:
+  file:
+    path: '/home/ubuntu/log'
+    name: '/home/ubuntu/log/main.log'
+  pattern:
+    file: '%d{yyyy-MM-dd HH:mm:ss} %clr([%thread]){magenta}  %clr(%5p) %logger{36} - %msg%n'
+    console: '%d{yyyy-MM-dd HH:mm:ss} %clr([%thread]){magenta}  %clr(%5p) %logger{36} - %msg%n'
+  level:
+    root: warn
+
