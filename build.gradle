@@ -43,7 +43,7 @@ bootBuildImage {
 		ext.rdbmsUsername = "root"
 		ext.rdbmsPassword = "1111"
 	}
-	imageName = 'user_security'
+	imageName = 'blog_user'
 	environment = [
 			"BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
 			"BPE_APPEND_JAVA_TOOL_OPTIONS" :
