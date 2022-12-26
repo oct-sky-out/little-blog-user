@@ -35,10 +35,10 @@ jobs:
     - name: Build and create Docker Image with Gradle
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
-        arguments: bootBuildImage -PactiveMode=${{ secrets.ACTIVE_MODE }} \
-          -Pport=${{ secrets.USER_SERVER_PORT }} \
-          -PrdbmsUrl=${{ secrets.RDBMS_URL }} \
-          -PrdbmsUsername=${{ secrets.RDBMS_USER_NAME }} \
+        arguments: bootBuildImage -PactiveMode=${{ secrets.ACTIVE_MODE }} 
+          -Pport=${{ secrets.USER_SERVER_PORT }} 
+          -PrdbmsUrl=${{ secrets.RDBMS_URL }} 
+          -PrdbmsUsername=${{ secrets.RDBMS_USER_NAME }} 
           -PrdbmsPassword=${{ secrets.RDBMS_PASSWORD }}
 
     - name: extract version name
