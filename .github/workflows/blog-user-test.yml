@@ -10,7 +10,7 @@ name: Pull request test phase
 on:
   pull_request:
     branches:
-      - main
+      - [ main, development ]
 
 jobs:
   test:
