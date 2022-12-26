@@ -13,16 +13,47 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.session:spring-session-core'
+	implementation 'com.auth0:java-jwt:4.2.1'
+
 	runtimeOnly 'com.mysql:mysql-connector-j'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+bootBuildImage {
+	if (!project.hasProperty("port") &&
+			!project.hasProperty("activeMode") &&
+			!project.hasProperty("rdbmsUrl") &&
+			!project.hasProperty("rdbmsUsername") &&
+			!project.hasProperty("rdbmsPassword")) {
+		ext.port = "8081"
+		ext.activeMode = "dev"
+		ext.rdbmsUrl = "jdbc:mysql://localhost:3307/user"
+		ext.rdbmsUsername = "root"
+		ext.rdbmsPassword = "1111"
+	}
+	imageName = 'user_security'
+	environment = [
+			"BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
+			"BPE_APPEND_JAVA_TOOL_OPTIONS" :
+							"-Dspring.profiles.active=" + "${activeMode}" + " " +
+							"-Dserver.port=" + "${port}" + " " +
+							"-Dspring.datasource.url=" + "${rdbmsUrl}" + " " +
+							"-Dspring.datasource.username=" + "${rdbmsUsername}" + " " +
+							"-Dspring.datasource.password=" + "${rdbmsPassword}" + " " +
+							"-XX:ActiveProcessorCount=1 -XX:+HeapDumpOnOutOfMemoryError" + " " +
+							"-Xms50M -Xmx50M",
+			"BPE_APPEND_BPL_HEAP_DUMP_PATH" :  "/workspace/heap_dump"
+	]
 }
