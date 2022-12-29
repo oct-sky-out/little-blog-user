@@ -12,19 +12,28 @@ repositories {
 	mavenCentral()
 }
 
+dependencyManagement {
+	imports {
+		mavenBom 'org.springframework.session:spring-session-bom:2021.1.1'
+	}
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.session:spring-session-core'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'com.auth0:java-jwt:4.2.1'
+	compileOnly 'org.projectlombok:lombok'
 
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+	annotationProcessor 'org.projectlombok:lombok'
 }
 
 tasks.named('test') {
@@ -36,12 +45,26 @@ bootBuildImage {
 			!project.hasProperty("activeMode") &&
 			!project.hasProperty("rdbmsUrl") &&
 			!project.hasProperty("rdbmsUsername") &&
-			!project.hasProperty("rdbmsPassword")) {
+			!project.hasProperty("rdbmsPassword") &&
+			!project.hasProperty("redisHost") &&
+			!project.hasProperty("redisPort") &&
+			!project.hasProperty("redisDatabase") &&
+			!project.hasProperty("redisPassword") &&
+			!project.hasProperty("githubOAuhtClientId") &&
+			!project.hasProperty("githubClientSecret") &&
+			!project.hasProperty("githubOAuthRedirectUrl")) {
 		ext.port = "8081"
 		ext.activeMode = "dev"
 		ext.rdbmsUrl = "jdbc:mysql://localhost:3307/user"
 		ext.rdbmsUsername = "root"
 		ext.rdbmsPassword = "1111"
+		ext.redisHost = "redis"
+		ext.redisPort = "6379"
+		ext.redisDatabase = "0"
+		ext.redisPassword = ""
+		ext.githubOAuhtClientId = ""
+		ext.githubClientSecret = ""
+		ext.githubOAuthRedirectUrl = ""
 	}
 	imageName = 'blog_user'
 	environment = [
@@ -52,6 +75,13 @@ bootBuildImage {
 							"-Dspring.datasource.url=" + "${rdbmsUrl}" + " " +
 							"-Dspring.datasource.username=" + "${rdbmsUsername}" + " " +
 							"-Dspring.datasource.password=" + "${rdbmsPassword}" + " " +
+							"-Dredis.host=" + "${redisHost}" + " " +
+							"-Dredis.port=" + "${redisPort}" + " " +
+							"-Dredis.database=" + "${redisDatabase}" + " " +
+							"-Dredis.password=" + "${redisPassword}" + " " +
+							"-Dgithub.client-id=" + "${githubOAuhtClientId}" + " " +
+							"-Dgithub.client-secret=" + "${githubClientSecret}" + " " +
+							"-Dgithub.redirect-url=" + "${githubOAuthRedirectUrl}" + " " +
 							"-XX:ActiveProcessorCount=1 -XX:+HeapDumpOnOutOfMemoryError" + " " +
 							"-Xms50M -Xmx50M",
 			"BPE_APPEND_BPL_HEAP_DUMP_PATH" :  "/workspace/heap_dump"
