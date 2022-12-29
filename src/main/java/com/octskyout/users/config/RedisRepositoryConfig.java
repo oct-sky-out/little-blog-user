@@ -2,6 +2,7 @@ package com.octskyout.users.config;
 
 import java.util.Objects;
 import lombok.Getter;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,17 +11,19 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Getter
 @Configuration
 @EnableRedisRepositories
 @ConfigurationProperties(prefix = "redis")
-public class RedisRepositoryConfig {
+public class RedisRepositoryConfig implements BeanClassLoaderAware {
     private String host;
     private String password;
     private Integer port;
     private Integer database;
+    private ClassLoader classLoader;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
@@ -36,12 +39,15 @@ public class RedisRepositoryConfig {
     }
 
     @Bean
+    @SuppressWarnings("java:S1452")
     public RedisTemplate<?, ?> redisTemplate(){
         RedisTemplate<byte[], byte[]> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         redisTemplate.setStringSerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
 
         return redisTemplate;
     }
@@ -76,5 +82,10 @@ public class RedisRepositoryConfig {
 
     public void setDatabase(Integer database) {
         this.database = database;
+    }
+
+    @Override
+    public void setBeanClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 }
