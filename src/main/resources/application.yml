@@ -15,6 +15,7 @@ spring:
 
   datasource:
     hikari:
+      driver-class-name: com.mysql.cj.jdbc.Driver
       pool-name: HikariCP
       connectionTestQuery : SELECT 1
       connection-timeout: 30000
@@ -32,13 +33,13 @@ spring:
     username: root
     password: 1111
     hikari:
-      driver-class-name: com.mysql.cj.jdbc.Driver
       maximum-pool-size: 1
 
 redis:
   host: 127.0.0.1
   port: 6379
   database: 0
+  password: ""
 
 server:
   port: 8081
@@ -61,7 +62,6 @@ logging:
               BasicBinder: TRACE
       springframework:
         web: DEBUG
-        security: DEBUG
 
 github:
   client-id: 8dd94b69615b6ca2abe5
@@ -75,7 +75,6 @@ spring:
       on-profile: prod
   datasource:
     hikari:
-      driver-class-name: com.mysql.cj.jdbc.Driver
       # https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
       # The calculation of pool size in order to avoid deadlock is a fairly simple resource allocation formula:
       # pool size = Tn * (Cm - 1) + 1
