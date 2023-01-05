@@ -68,6 +68,13 @@ github:
   client-secret: 36bf2497dbb99296f60d56109badacce7514d733
   redirect-url: http://127.0.0.1:8081/api/login/oauth2/github
 
+secure:
+  jwt:
+    secret: 312b3e578a63c0a34ed3f359263f01259e5cda07df73771d26928be5
+  aes:
+    alg: AES/CBC/PKCS5Padding
+    key: 9d6bf7b53696697eb36e1b05f25fad18
+
 ---
 spring:
   config:
