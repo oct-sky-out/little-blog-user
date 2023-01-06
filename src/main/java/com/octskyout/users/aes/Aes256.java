@@ -11,21 +11,24 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public final class Aes256 {
+    @Value("${secure.aes.alg}")
     private final String algorithm;
 
+    @Value("${secure.aes.key}")
     private final String key;
 
+    @Value("${secure.aes.iv}")
     private final String iv;
 
-    public Aes256(String algorithm, String key, String iv) {
-        this.algorithm = algorithm;
-        this.key = key;
-        this.iv = iv;
-    }
 
     @SuppressWarnings("java:S3329")
     public String encrypt(String str)
