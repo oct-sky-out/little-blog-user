@@ -37,7 +37,7 @@ class GithubOAuthControllerTest {
         given(githubOauthAdapter.requestGithubOauthSignIn())
             .willReturn(adapterResult);
 
-        mockMvc.perform(get("http://github.com/example"))
+        mockMvc.perform(get("/api/login/oauth2/github"))
             .andExpect(status().isOk())
             .andExpect(header().string("Content-Type", MediaTypes.HAL_JSON_VALUE))
             .andExpect(jsonPath("$.result").value("OK"))
@@ -53,7 +53,7 @@ class GithubOAuthControllerTest {
     @Test
     void 깃허브로부터오는_콜백요청을_받는다() throws Exception {
         String username = "example";
-        String id = "id";
+        Long id = 123L;
         String avatar = "http://github.com/example/avartar";
         String html = "http://github.com/example";
         String email = null;

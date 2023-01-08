@@ -29,7 +29,7 @@ class JWTUtilTest {
     @Test
     void 토큰을_생성한다() {
         String username = "username";
-        String id = "id";
+        Long id = 123L;
         String avatarUrl = "http://github.com/username/avatar";
         String htmlUrl = "http://github.com/username";
         String email = null;

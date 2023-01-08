@@ -23,10 +23,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'com.auth0:java-jwt:4.2.1'
 	compileOnly 'org.projectlombok:lombok'
 
 	runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'com.h2database:h2'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testCompileOnly 'org.projectlombok:lombok'
@@ -62,9 +64,12 @@ bootBuildImage {
 		ext.redisPort = "6379"
 		ext.redisDatabase = "0"
 		ext.redisPassword = ""
-		ext.githubOAuhtClientId = ""
-		ext.githubClientSecret = ""
-		ext.githubOAuthRedirectUrl = ""
+		ext.githubOAuhtClientId = "8dd94b69615b6ca2abe5"
+		ext.githubClientSecret = "36bf2497dbb99296f60d56109badacce7514d733"
+		ext.githubOAuthRedirectUrl = "http://127.0.0.1:8081/api/login/oauth2/github"
+		ext.jwtSecret = "312b3e578a63c0a34ed3f359263f01259e5cda07df73771d26928be5"
+		ext.aesAlg = "AES/CBC/PKCS5Padding"
+		ext.aesKey = "9d6bf7b53696697eb36e1b05f25fad18"
 	}
 	imageName = 'blog_user'
 	environment = [
@@ -82,8 +87,12 @@ bootBuildImage {
 							"-Dgithub.client-id=" + "${githubOAuhtClientId}" + " " +
 							"-Dgithub.client-secret=" + "${githubClientSecret}" + " " +
 							"-Dgithub.redirect-url=" + "${githubOAuthRedirectUrl}" + " " +
+							"-Dsecure.jwt.secret=" + "${jwtSecret}" + " " +
+							"-Dsecure.aes.alg=" + "${aesAlg}" + " " +
+							"-Dsecure.aes.key=" + "${aesKey}" + " " +
 							"-XX:ActiveProcessorCount=1 -XX:+HeapDumpOnOutOfMemoryError" + " " +
-							"-Xms50M -Xmx50M",
+							"-XX:+OnOutOfMemoryError='sleep= 10; kill.sh %p'" + " " +
+							"-Xms5M -Xmx5M",
 			"BPE_APPEND_BPL_HEAP_DUMP_PATH" :  "/workspace/heap_dump"
 	]
 }
