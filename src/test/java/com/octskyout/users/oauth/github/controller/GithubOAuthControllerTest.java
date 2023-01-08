@@ -1,6 +1,5 @@
 package com.octskyout.users.oauth.github.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -13,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.octskyout.users.oauth.github.adapter.GithubOauthAdapter;
 import com.octskyout.users.oauth.github.dto.GithubUserDto;
+import com.octskyout.users.token.JWTUtil;
+import com.octskyout.users.token.TokenType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -27,6 +28,8 @@ class GithubOAuthControllerTest {
 
     @MockBean
     private GithubOauthAdapter githubOauthAdapter;
+    @MockBean
+    private JWTUtil jwtUtil;
 
     @Test
     void 사용자의_깃허브_로그인_접속시도시_요청을_받는다() throws Exception {
@@ -53,8 +56,17 @@ class GithubOAuthControllerTest {
         String id = "id";
         String avatar = "http://github.com/example/avartar";
         String html = "http://github.com/example";
+        String email = null;
+        GithubUserDto githubUserDto = new GithubUserDto(username, id, avatar, html, email);
+        String exampleAccessToken = "example access token";
+        String exampleRefreshToken = "example refresh token";
+
         given(githubOauthAdapter.processOAuthLogin(anyString(), anyString()))
-            .willReturn(new GithubUserDto(username, id, avatar, html));
+            .willReturn(githubUserDto);
+        given(jwtUtil.createToken(githubUserDto, TokenType.ACCESS))
+            .willReturn(exampleAccessToken);
+        given(jwtUtil.createToken(githubUserDto, TokenType.REFRESH))
+            .willReturn(exampleRefreshToken);
 
         String requestUri = "/api/login/oauth2/github/callback?code={code}&state={state}";
         String code = "12345";
@@ -62,15 +74,23 @@ class GithubOAuthControllerTest {
         mockMvc.perform(get(requestUri, code, state))
             .andExpect(status().isOk())
             .andExpect(header().string("Content-Type", MediaTypes.HAL_JSON_VALUE))
-            .andExpect(jsonPath("$.username").value(username))
-            .andExpect(jsonPath("$.id").value(id))
-            .andExpect(jsonPath("$.avatarUrl").value(avatar))
-            .andExpect(jsonPath("$.htmlUrl").value(html))
-            .andExpect(jsonPath("$._links.self.href").value("http://localhost/api/login/oauth2/github/callback?code=12345&state=abcd"));
+            .andExpect(jsonPath("$.user.username").value(username))
+            .andExpect(jsonPath("$.user.id").value(id))
+            .andExpect(jsonPath("$.user.avatarUrl").value(avatar))
+            .andExpect(jsonPath("$.user.htmlUrl").value(html))
+            .andExpect(jsonPath("$.token.accessToken").value(exampleAccessToken))
+            .andExpect(jsonPath("$.token.refreshToken").value(exampleRefreshToken))
+            .andExpect(jsonPath("$._links.self.href").value("http://localhost/api/login/oauth2/github/callback?code=12345&state=abcd"))
+            .andExpect(jsonPath("$._links.githubHtml.href").value(html));
 
         then(githubOauthAdapter)
             .should(times(1))
             .processOAuthLogin(code, state);
-
+        then(jwtUtil)
+            .should(times(1))
+            .createToken(githubUserDto, TokenType.ACCESS);
+        then(jwtUtil)
+            .should(times(1))
+            .createToken(githubUserDto, TokenType.REFRESH);
     }
 }

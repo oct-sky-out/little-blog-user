@@ -51,6 +51,6 @@ public class GithubOAuthController {
 
         return EntityModel.of(resource,
             linkTo(selfRel).withSelfRel(),
-            Link.of(user.htmlUrl()).withRel("githubHtml"));
+            Link.of(user.getHtmlUrl()).withRel("githubHtml"));
     }
 }
