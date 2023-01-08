@@ -4,7 +4,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import com.octskyout.users.oauth.github.adapter.GithubOauthAdapter;
+import com.octskyout.users.oauth.github.dto.GithubLoginSuccessResponseDto;
 import com.octskyout.users.oauth.github.dto.GithubUserDto;
+import com.octskyout.users.token.AccessRefreshTokens;
+import com.octskyout.users.token.JWTUtil;
+import com.octskyout.users.token.TokenType;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class GithubOAuthController {
     private final GithubOauthAdapter githubOauthAdapter;
+    private final JWTUtil jwtUtil;
 
     @GetMapping
     public EntityModel<Map<String, String>> trySignInAtGithubOauth() {
@@ -34,13 +39,17 @@ public class GithubOAuthController {
     }
 
     @GetMapping("/callback")
-    public EntityModel<GithubUserDto> successLogin(@RequestParam String code,
+    public EntityModel<GithubLoginSuccessResponseDto> successLogin(@RequestParam String code,
                                                    @RequestParam String state) {
         GithubUserDto user = githubOauthAdapter.processOAuthLogin(code, state);
+        String access = jwtUtil.createToken(user, TokenType.ACCESS);
+        String refresh = jwtUtil.createToken(user, TokenType.REFRESH);
+        AccessRefreshTokens tokens = new AccessRefreshTokens(access, refresh);
+        GithubLoginSuccessResponseDto resource = new GithubLoginSuccessResponseDto(user, tokens);
 
         var selfRel = methodOn(GithubOAuthController.class).successLogin(code, state);
 
-        return EntityModel.of(user,
+        return EntityModel.of(resource,
             linkTo(selfRel).withSelfRel(),
             Link.of(user.htmlUrl()).withRel("githubHtml"));
     }
