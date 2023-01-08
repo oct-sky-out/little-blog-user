@@ -1,5 +1,6 @@
 package com.octskyout.users.oauth.entity;
 
+import com.octskyout.users.oauth.github.dto.GithubUserDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,11 +32,13 @@ public class OauthUser {
     @NotNull
     private LocalDateTime lastLoginDateTime;
 
-    @NotNull
     private Long githubId;
 
-    public static OauthUser createGithubOauthUser(Long githubId, String username, String email) {
-        return new OauthUser(githubId, username, email);
+    public static OauthUser createGithubOauthUser(GithubUserDto githubUserDto) {
+        return new OauthUser(
+            githubUserDto.getId(),
+            githubUserDto.getUsername(),
+            githubUserDto.getEmail());
     }
 
     private OauthUser(Long githubId, String username, String email) {

@@ -1,9 +1,9 @@
 package com.octskyout.users.oauth.interfaces;
 
-public interface OauthUser {
+public interface OauthUser<T> {
     String getUsername();
 
-    String getId();
+    T getId();
 
     String getEmail();
 }

@@ -9,7 +9,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class GithubUserDto implements OauthUser {
+public class GithubUserDto implements OauthUser<Long> {
     @NotEmpty
     private String username;
 
@@ -23,8 +23,8 @@ public class GithubUserDto implements OauthUser {
     private String htmlUrl;
     private String email;
 
-    public String getId() {
-        return id.toString();
+    public Long getId() {
+        return id;
     }
 
     @JsonProperty("login")

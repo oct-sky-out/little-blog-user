@@ -3,6 +3,7 @@ package com.octskyout.users.oauth.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.octskyout.users.oauth.entity.OauthUser;
+import com.octskyout.users.oauth.github.dto.GithubUserDto;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,9 @@ class OauthUserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        oauthUserRepository.save(OauthUser.createGithubOauthUser(123L, username, email));
+        GithubUserDto githubUserDto =
+            new GithubUserDto(username, 123L, "", "", email);
+        oauthUserRepository.save(OauthUser.createGithubOauthUser(githubUserDto));
     }
 
     @Test
