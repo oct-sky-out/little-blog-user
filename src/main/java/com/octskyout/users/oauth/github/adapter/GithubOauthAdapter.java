@@ -30,7 +30,7 @@ public class GithubOauthAdapter {
         Map<String, String> uriParam =
             Map.of("client_id", gitHubOauthConfig.getClientId(),
                 "redirect_uri", gitHubOauthConfig.getRedirectUrl(),
-                "scope", "user:login user:id user:avatar_url user:html_url",
+                "scope", "user:login user:id user:avatar_url user:html_url user:email",
                 "state", state);
         String loginRequestUrl =
             "/login/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&scope={scope}&state={state}";

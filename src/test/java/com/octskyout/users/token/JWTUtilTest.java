@@ -25,14 +25,15 @@ class JWTUtilTest {
     String iv = key.substring(0,16);
 
     Aes256 aes256 = new Aes256(alg, key, iv);
-    private JWTUtil jwtUtil = new JWTUtil("example", aes256);
+    private final JWTUtil jwtUtil = new JWTUtil("example", aes256);
     @Test
     void 토큰을_생성한다() {
         String username = "username";
         String id = "id";
         String avatarUrl = "http://github.com/username/avatar";
         String htmlUrl = "http://github.com/username";
-        GithubUserDto githubUserDto = new GithubUserDto(username, id, avatarUrl, htmlUrl);
+        String email = null;
+        GithubUserDto githubUserDto = new GithubUserDto(username, id, avatarUrl, htmlUrl, email);
 
         String accessToken = jwtUtil.createToken(githubUserDto, TokenType.ACCESS);
         assertThat(accessToken).isInstanceOf(String.class);
@@ -44,7 +45,7 @@ class JWTUtilTest {
         IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException,
         InvalidKeyException {
         String accessToken =
-            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJvY3Qtc2t5LW91dCIsImdpdGh1YlByb2ZpbGUiOiJFc0YwT3ZLaXh1Sk50Wk9uaWxzUUJML1BTMS9rSGpGSmVFTExzbTREak40PSIsImV4cCI6NDgyODY2MzM5NSwiaWF0IjoxNjcyOTg5Nzk1LCJ1c2VybmFtZSI6Ik9VcUNESU1TcERNS0VHSmJWejAzT2c9PSJ9.rE7WuGgYOWBX9xbrOkyPPu2gU8QwhLzTRJUoDyIHB2o";
+            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJvY3Qtc2t5LW91dCIsImdpdGh1YlByb2ZpbGUiOiJFc0YwT3ZLaXh1Sk50Wk9uaWxzUUJML1BTMS9rSGpGSmVFTExzbTREak40PSIsImV4cCI6MzMyMzAwNzk1MjQsImlhdCI6MTY3MzE3MDcyNCwiZW1haWwiOm51bGwsInVzZXJuYW1lIjoiT1VxQ0RJTVNwRE1LRUdKYlZ6MDNPZz09In0.G_7-rkD3_991FrI9GoU3hnIarMCb-Dx_946awdctAF4";
 
         Map<String, Claim> decodedJWTClaims = jwtUtil.verifyToken(accessToken).getClaims();
 
@@ -55,6 +56,7 @@ class JWTUtilTest {
         Long expireTimeAsLong = decodedJWTClaims.get("exp").asLong();
         String encryptedUsername = decodedJWTClaims.get("username").asString();
         String encryptedGithubHtml = decodedJWTClaims.get("githubProfile").asString();
+        Claim encryptedEmail = decodedJWTClaims.get("email");
         String jwtUsername = aes256.decrypt(encryptedUsername);
         String jwtGithubHtml = aes256.decrypt(encryptedGithubHtml);
 
@@ -62,6 +64,7 @@ class JWTUtilTest {
         assertThat(expireTimeAsLong).isGreaterThan(Instant.now().getEpochSecond());
         assertThat(jwtUsername).isEqualTo(username);
         assertThat(jwtGithubHtml).isEqualTo(htmlUrl);
+        assertThat(encryptedEmail.isNull()).isTrue();
     }
 
     @Test

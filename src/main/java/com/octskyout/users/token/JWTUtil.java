@@ -37,13 +37,15 @@ public class JWTUtil {
             Instant issueAt = LocalDateTime.now().toInstant(ZoneOffset.ofHours(9));
             Instant expAt = LocalDateTime.now().plus(type.getExpMilliSeconds(), ChronoUnit.MILLIS)
                 .toInstant(ZoneOffset.ofHours(9));
-            String encryptUsername = aes256.encrypt(githubUserDto.username());
-            String encryptHtmlUrl = aes256.encrypt(githubUserDto.htmlUrl());
+            String encryptUsername = aes256.encrypt(githubUserDto.getUsername());
+            String encryptHtmlUrl = aes256.encrypt(githubUserDto.getHtmlUrl());
+            String encryptEmail = aes256.encrypt(githubUserDto.getEmail());
 
             return JWT.create()
                 .withIssuer("oct-sky-out")
                 .withClaim("username", encryptUsername)
                 .withClaim("githubProfile", encryptHtmlUrl)
+                .withClaim("email", encryptEmail)
                 .withIssuedAt(issueAt)
                 .withExpiresAt(expAt)
                 .sign(algorithm);
