@@ -11,6 +11,7 @@ import com.octskyout.users.token.AccessRefreshTokens;
 import com.octskyout.users.token.JWTUtil;
 import com.octskyout.users.token.TokenType;
 import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -29,7 +30,8 @@ public class GithubOAuthController {
 
     @GetMapping
     public EntityModel<Map<String, String>> trySignInAtGithubOauth() {
-        String loginPageUrl = githubOauthAdapter.requestGithubOauthSignIn();
+        String loginPageUrl =
+            githubOauthAdapter.requestGithubOauthSignIn(UUID.randomUUID().toString());
         EntityModel<Map<String, String>> selfRel =
             methodOn(GithubOAuthController.class).trySignInAtGithubOauth();
 

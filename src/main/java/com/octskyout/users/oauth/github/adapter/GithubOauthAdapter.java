@@ -6,7 +6,7 @@ import com.octskyout.users.oauth.github.dto.GithubUserAccessTokenDto;
 import com.octskyout.users.oauth.github.dto.GithubUserDto;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
@@ -18,14 +18,15 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @RequiredArgsConstructor
 public class GithubOauthAdapter {
-    private static final String OAUTH_STATE = "OAUTH_STATE";
+    public static final String OAUTH_STATE = "OAUTH_STATE:";
     private final RestTemplate githubRestTemplate;
     private final RedisTemplate<String, Object> redisTemplate;
     private final GitHubOauth2ClientConfig gitHubOauthConfig;
 
-    public String requestGithubOauthSignIn() {
-        String state = UUID.randomUUID().toString();
-        redisTemplate.opsForHash().put(OAUTH_STATE, state, false);
+    public String requestGithubOauthSignIn(String state) {
+        String key = OAUTH_STATE + state;
+        redisTemplate.opsForValue().set(key, false);
+        redisTemplate.expire(key, 5, TimeUnit.MINUTES);
 
         Map<String, String> uriParam =
             Map.of("client_id", gitHubOauthConfig.getClientId(),
@@ -42,7 +43,7 @@ public class GithubOauthAdapter {
 
     public GithubUserDto processOAuthLogin(String code, String state) {
         Boolean isExpired =
-            (Boolean) Optional.ofNullable(redisTemplate.opsForHash().get(OAUTH_STATE, state))
+            (Boolean) Optional.ofNullable(redisTemplate.opsForValue().get(OAUTH_STATE + state))
                 .orElse(true);
 
         if (Boolean.TRUE.equals(isExpired)) {
