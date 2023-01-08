@@ -3,6 +3,7 @@ package com.octskyout.users.oauth.github.controller;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -12,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.octskyout.users.oauth.github.adapter.GithubOauthAdapter;
 import com.octskyout.users.oauth.github.dto.GithubUserDto;
+import com.octskyout.users.oauth.github.service.GithubOauthService;
 import com.octskyout.users.token.JWTUtil;
 import com.octskyout.users.token.TokenType;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,8 @@ class GithubOAuthControllerTest {
 
     @MockBean
     private GithubOauthAdapter githubOauthAdapter;
+    @MockBean
+    private GithubOauthService githubOauthService;
     @MockBean
     private JWTUtil jwtUtil;
 
@@ -61,6 +65,7 @@ class GithubOAuthControllerTest {
         String exampleAccessToken = "example access token";
         String exampleRefreshToken = "example refresh token";
 
+        willDoNothing().given(githubOauthService).doSignIn(githubUserDto);
         given(githubOauthAdapter.processOAuthLogin(anyString(), anyString()))
             .willReturn(githubUserDto);
         given(jwtUtil.createToken(githubUserDto, TokenType.ACCESS))
@@ -83,6 +88,9 @@ class GithubOAuthControllerTest {
             .andExpect(jsonPath("$._links.self.href").value("http://localhost/api/login/oauth2/github/callback?code=12345&state=abcd"))
             .andExpect(jsonPath("$._links.githubHtml.href").value(html));
 
+        then(githubOauthService)
+            .should(times(1))
+                .doSignIn(githubUserDto);
         then(githubOauthAdapter)
             .should(times(1))
             .processOAuthLogin(code, state);
