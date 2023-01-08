@@ -5,7 +5,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.octskyout.users.aes.Aes256;
 import com.octskyout.users.oauth.github.dto.GithubUserDto;
@@ -58,7 +57,7 @@ public class JWTUtil {
         }
     }
 
-    public DecodedJWT verifyToken(String token) {
+    public JwtDecoded verifyToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(hmacSecret);
             JWTVerifier verifier = JWT.require(algorithm)
@@ -66,7 +65,9 @@ public class JWTUtil {
                 .acceptLeeway(3)
                 .build();
 
-            return verifier.verify(token);
+            JwtDecoded.Header jwtHeader = getHeaderFromClaim(token, verifier);
+            JwtDecoded.Payload jwtPayload = getPayloadFromClaim(token, verifier);
+            return new JwtDecoded(jwtHeader, jwtPayload);
         } catch (TokenExpiredException expiredException) {
             // expired jwt token
             throw new TokenExpiredException("이미 만료된 토큰입니다.", Instant.now());
@@ -75,4 +76,21 @@ public class JWTUtil {
             throw new RuntimeException("토큰 검증에 문제가 발생했습니다.");
         }
     }
+
+    private JwtDecoded.Header getHeaderFromClaim(String token, JWTVerifier verifier) {
+        return new JwtDecoded.Header(
+            verifier.verify(token).getHeaderClaim("alg").asString(),
+            verifier.verify(token).getHeaderClaim("typ").asString());
+    }
+
+    private JwtDecoded.Payload getPayloadFromClaim(String token, JWTVerifier verifier) {
+        return new JwtDecoded.Payload(
+            verifier.verify(token).getClaim("iss").asString(),
+            verifier.verify(token).getClaim("githubProfile").asString(),
+            verifier.verify(token).getClaim("exp").asLong(),
+            verifier.verify(token).getClaim("iat").asLong(),
+            verifier.verify(token).getClaim("email").asString(),
+            verifier.verify(token).getClaim("username").asString());
+    }
+
 }
