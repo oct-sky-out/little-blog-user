@@ -31,6 +31,15 @@ class Aes256Test {
     }
 
     @Test
+    void 암호화를_수행한다_null이_들어오면_null로_반환한다()
+        throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
+        BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+        String encryptStr = aes256.encrypt(null);
+
+        assertThat(encryptStr).isNull();
+    }
+
+    @Test
     void 복호화_및_같은_값인지_비교에_성공한다()
         throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
         BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
@@ -40,4 +49,14 @@ class Aes256Test {
 
         assertThat(decryptStr).isEqualTo(realStr);
     }
+
+    @Test
+    void 복호화_대상이_null로_들어오면_null로_반환한다()
+        throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
+        BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+        String decrypt = aes256.decrypt(null);
+
+        assertThat(decrypt).isNull();
+    }
+
 }

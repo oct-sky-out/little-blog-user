@@ -5,6 +5,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.Objects;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -14,6 +15,7 @@ import javax.crypto.spec.SecretKeySpec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -31,9 +33,13 @@ public final class Aes256 {
 
 
     @SuppressWarnings("java:S3329")
+    @Nullable
     public String encrypt(String str)
         throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
         IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+        if(Objects.isNull(str)) {
+            return null;
+        }
         Cipher cipher = Cipher.getInstance(algorithm);
         SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), "AES");
         IvParameterSpec ivSpec = new IvParameterSpec(iv.getBytes());
@@ -45,9 +51,14 @@ public final class Aes256 {
         return Base64.getEncoder().encodeToString(encrypted);
     }
 
+    @Nullable
     public String decrypt(String encryptedBase64)
         throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
         IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+        if(Objects.isNull(encryptedBase64)) {
+            return null;
+        }
+
         Cipher cipher = Cipher.getInstance(algorithm);
         SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), "AES");
         IvParameterSpec ivSpec = new IvParameterSpec(iv.getBytes());
