@@ -84,13 +84,28 @@ public class JWTUtil {
     }
 
     private JwtDecoded.Payload getPayloadFromClaim(String token, JWTVerifier verifier) {
+        String encryptedGithubProfile = verifier.verify(token).getClaim("githubProfile").asString();
+        String encryptedEmail = verifier.verify(token).getClaim("email").asString();
+        String encryptedUsername = verifier.verify(token).getClaim("username").asString();
+
+        try {
+            String decryptedGithubProfile = aes256.decrypt(encryptedGithubProfile);
+            String decryptedEmail = aes256.decrypt(encryptedEmail);
+            String decryptedUsername = aes256.decrypt(encryptedUsername);
+
         return new JwtDecoded.Payload(
             verifier.verify(token).getClaim("iss").asString(),
-            verifier.verify(token).getClaim("githubProfile").asString(),
+            decryptedGithubProfile,
             verifier.verify(token).getClaim("exp").asLong(),
             verifier.verify(token).getClaim("iat").asLong(),
-            verifier.verify(token).getClaim("email").asString(),
-            verifier.verify(token).getClaim("username").asString());
+            decryptedEmail,
+            decryptedUsername);
+
+        }catch (InvalidAlgorithmParameterException | NoSuchPaddingException
+                | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException
+                | InvalidKeyException e) {
+            throw new RuntimeException("개인정보 암호화에 실패했습니다.");
+        }
     }
 
 }

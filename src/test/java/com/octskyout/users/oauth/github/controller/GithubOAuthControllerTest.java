@@ -3,7 +3,6 @@ package com.octskyout.users.oauth.github.controller;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -65,7 +64,7 @@ class GithubOAuthControllerTest {
         String exampleAccessToken = "example access token";
         String exampleRefreshToken = "example refresh token";
 
-        willDoNothing().given(githubOauthService).doSignIn(githubUserDto);
+        given(githubOauthService.doSignIn(githubUserDto)).willReturn(false);
         given(githubOauthAdapter.processOAuthLogin(anyString(), anyString()))
             .willReturn(githubUserDto);
         given(jwtUtil.createToken(githubUserDto, TokenType.ACCESS))
@@ -79,6 +78,7 @@ class GithubOAuthControllerTest {
         mockMvc.perform(get(requestUri, code, state))
             .andExpect(status().isOk())
             .andExpect(header().string("Content-Type", MediaTypes.HAL_JSON_VALUE))
+            .andExpect(jsonPath("$.isAdmin").value(false))
             .andExpect(jsonPath("$.user.username").value(username))
             .andExpect(jsonPath("$.user.id").value(id))
             .andExpect(jsonPath("$.user.avatarUrl").value(avatar))

@@ -11,14 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class GithubOauthService {
+    public static final String ADMIN_USERNAME = "oct-sky-out";
     private final OauthUserRepository oauthUserRepository;
 
     @Transactional
-    public void doSignIn(GithubUserDto githubUserDto){
+    public Boolean doSignIn(GithubUserDto githubUserDto){
         Optional<OauthUser> oauthUser =
             oauthUserRepository.findOauthUserByUsername(githubUserDto.getUsername());
 
         oauthUser.ifPresentOrElse(this::presentDoSignIn, noPresentDoSignUp(githubUserDto));
+        return isAdmin(githubUserDto.getUsername());
     }
 
     private void presentDoSignIn(OauthUser oauthUser) {
@@ -27,5 +29,9 @@ public class GithubOauthService {
 
     private Runnable noPresentDoSignUp(GithubUserDto githubUserDto) {
         return () -> oauthUserRepository.save(OauthUser.createGithubOauthUser(githubUserDto));
+    }
+
+    private Boolean isAdmin(String username) {
+        return username.equals(ADMIN_USERNAME);
     }
 }

@@ -6,13 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.octskyout.users.aes.Aes256;
 import com.octskyout.users.oauth.github.dto.GithubUserDto;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -39,9 +33,7 @@ class JWTUtilTest {
     }
 
     @Test
-    void 이전에_생성되었던_토큰을_검사한다_성공() throws InvalidAlgorithmParameterException, NoSuchPaddingException,
-        IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException,
-        InvalidKeyException {
+    void 이전에_생성되었던_토큰을_검사한다_성공() {
         String accessToken =
             "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJvY3Qtc2t5LW91dCIsImdpdGh1YlByb2ZpbGUiOiJFc0YwT3ZLaXh1Sk50Wk9uaWxzUUJML1BTMS9rSGpGSmVFTExzbTREak40PSIsImV4cCI6MzMyMzAwNzk1MjQsImlhdCI6MTY3MzE3MDcyNCwiZW1haWwiOm51bGwsInVzZXJuYW1lIjoiT1VxQ0RJTVNwRE1LRUdKYlZ6MDNPZz09In0.G_7-rkD3_991FrI9GoU3hnIarMCb-Dx_946awdctAF4";
 
@@ -52,17 +44,15 @@ class JWTUtilTest {
 
         String issuer = decodedJWTClaims.payload().issuer();
         Long expireTimeAsLong = decodedJWTClaims.payload().expireTime();
-        String encryptedUsername = decodedJWTClaims.payload().username();
-        String encryptedGithubHtml = decodedJWTClaims.payload().githubProfile();
-        String encryptedEmail = decodedJWTClaims.payload().email();
-        String jwtUsername = aes256.decrypt(encryptedUsername);
-        String jwtGithubHtml = aes256.decrypt(encryptedGithubHtml);
+        String decryptedUsername = decodedJWTClaims.payload().username();
+        String decryptedGithubHtml = decodedJWTClaims.payload().githubProfile();
+        String decryptedEmail = decodedJWTClaims.payload().email();
 
         assertThat(issuer).isEqualTo("oct-sky-out");
         assertThat(expireTimeAsLong).isGreaterThan(Instant.now().getEpochSecond());
-        assertThat(jwtUsername).isEqualTo(username);
-        assertThat(jwtGithubHtml).isEqualTo(htmlUrl);
-        assertThat(encryptedEmail).isNull();
+        assertThat(decryptedUsername).isEqualTo(username);
+        assertThat(decryptedGithubHtml).isEqualTo(htmlUrl);
+        assertThat(decryptedEmail).isNull();
     }
 
     @Test

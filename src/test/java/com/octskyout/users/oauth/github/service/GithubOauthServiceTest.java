@@ -4,13 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 import com.octskyout.users.oauth.dummy.OauthUserDummy;
 import com.octskyout.users.oauth.entity.OauthUser;
 import com.octskyout.users.oauth.github.dto.GithubUserDto;
 import com.octskyout.users.oauth.repository.OauthUserRepository;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -43,13 +43,14 @@ class GithubOauthServiceTest {
         given(oauthUserRepository.findOauthUserByUsername(githubUser.getUsername()))
             .willReturn(oauthUser);
 
-        githubOauthService.doSignIn(githubUser);
+        boolean isAdmin = githubOauthService.doSignIn(githubUser);
+        assertThat(isAdmin).isFalse();
 
         then(oauthUserRepository)
             .should(times(1))
             .findOauthUserByUsername(githubUser.getUsername());
 
-        assertThat(oauthUser.get())
+        assertThat(oauthUser.get().getLastLoginDateTime())
             .isNotEqualTo(beforeLoginDt);
     }
 
@@ -65,7 +66,8 @@ class GithubOauthServiceTest {
         given(oauthUserRepository.findOauthUserByUsername(githubUser.getUsername()))
             .willReturn(Optional.empty());
 
-        githubOauthService.doSignIn(githubUser);
+        boolean isAdmin = githubOauthService.doSignIn(githubUser);
+        assertThat(isAdmin).isFalse();
 
         then(oauthUserRepository)
             .should(times(1))
@@ -74,5 +76,33 @@ class GithubOauthServiceTest {
         then(oauthUserRepository)
             .should(times(1))
             .save(any());
+    }
+
+    @Test
+    void 데이터베이스에서_관리자를_찾을_수_있다() {
+        GithubUserDto githubUser = new GithubUserDto(
+            "admin",
+            123L,
+            "http://github.com/example/avatar",
+            "http://github.com/example",
+            null);
+
+        Optional<OauthUser> oauthAdminUser = OauthUserDummy.githubAdminUserDummy();
+        LocalDateTime lastLoginDt = oauthAdminUser.get().getLastLoginDateTime();
+
+        given(oauthUserRepository.findOauthUserByUsername(githubUser.getUsername()))
+            .willReturn(oauthAdminUser);
+
+        boolean isAdmin = githubOauthService.doSignIn(githubUser);
+        assertThat(isAdmin).isFalse();
+
+        then(oauthUserRepository)
+            .should(times(1))
+            .findOauthUserByUsername(githubUser.getUsername());
+        then(oauthUserRepository)
+            .should(never())
+            .save(any());
+        assertThat(oauthAdminUser.get().getLastLoginDateTime())
+            .isNotEqualTo(lastLoginDt);
     }
 }

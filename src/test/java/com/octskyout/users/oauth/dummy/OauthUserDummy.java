@@ -15,4 +15,15 @@ public class OauthUserDummy extends OauthUser {
 
         return Optional.of(OauthUser.createGithubOauthUser(githubUser));
     }
+
+    public static Optional<OauthUser> githubAdminUserDummy() {
+        GithubUserDto githubUser = new GithubUserDto(
+            "admin",
+            123L,
+            "http://github.com/example/avatar",
+            "http://github.com/example",
+            null);
+
+        return Optional.of(OauthUser.createGithubOauthUser(githubUser));
+    }
 }

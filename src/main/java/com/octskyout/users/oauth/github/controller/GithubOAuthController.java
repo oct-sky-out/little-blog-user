@@ -46,12 +46,13 @@ public class GithubOAuthController {
     public EntityModel<GithubLoginSuccessResponseDto> successLogin(@RequestParam String code,
                                                    @RequestParam String state) {
         GithubUserDto user = githubOauthAdapter.processOAuthLogin(code, state);
-        githubOauthService.doSignIn(user);
+        Boolean isAdmin = githubOauthService.doSignIn(user);
 
         String access = jwtUtil.createToken(user, TokenType.ACCESS);
         String refresh = jwtUtil.createToken(user, TokenType.REFRESH);
         AccessRefreshTokens tokens = new AccessRefreshTokens(access, refresh);
-        GithubLoginSuccessResponseDto resource = new GithubLoginSuccessResponseDto(user, tokens);
+        GithubLoginSuccessResponseDto resource =
+            new GithubLoginSuccessResponseDto(user, tokens, isAdmin);
 
         var selfRel = methodOn(GithubOAuthController.class).successLogin(code, state);
 
