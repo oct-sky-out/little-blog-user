@@ -1,24 +1,37 @@
 spring:
-  profiles:
-    active: dev
-
   jpa:
     show-sql: true
-    database: mysql
+    database: h2
+    database-platform: org.hibernate.dialect.MySQL57Dialect
     hibernate:
       naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+      ddl-auto: none
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.MySQL57Dialect
+        dialect.engine: innodb
+        format_sql: true
+        globally_quoted_identifiers: true
 
   datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL;
+    username: sa
+    driver-class-name: org.h2.Driver
     hikari:
-      driver-class-name: com.mysql.cj.jdbc.Driver
       pool-name: HikariCP
       connectionTestQuery : SELECT 1
       connection-timeout: 30000
+
+  sql:
+    init:
+      mode: always
+      schema-locations: h2-test-ddl.sql
+
+  h2:
+    console:
+      enabled: true
+      path: /h2
 
   hateoas:
     use-hal-as-default-json-media-type: true
@@ -28,12 +41,31 @@ spring:
   config:
     activate:
       on-profile: dev
+
+  jpa:
+    database: mysql
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        globally_quoted_identifiers: true
+
   datasource:
     url: jdbc:mysql://localhost:3307/user
     username: root
     password: 1111
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 1
+      pool-name: HikariCP
+      connectionTestQuery: SELECT 1
+      connection-timeout: 30000
 
 redis:
   host: 127.0.0.1
@@ -68,18 +100,41 @@ github:
   client-secret: 36bf2497dbb99296f60d56109badacce7514d733
   redirect-url: http://127.0.0.1:8081/api/login/oauth2/github
 
+secure:
+  jwt:
+    secret: 312b3e578a63c0a34ed3f359263f01259e5cda07df73771d26928be5
+  aes:
+    alg: AES/CBC/PKCS5Padding
+    key: 9d6bf7b53696697eb36e1b05f25fad18
+
 ---
 spring:
   config:
     activate:
       on-profile: prod
+  jpa:
+    database: mysql
+    show-sql: false
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        globally_quoted_identifiers: true
+
   datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       # https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing
       # The calculation of pool size in order to avoid deadlock is a fairly simple resource allocation formula:
       # pool size = Tn * (Cm - 1) + 1
       # core = 1, thread = 2 => 2 * (1 - 1) + 1 = 1
       maximum-pool-size: 1
+      pool-name: HikariCP
+      connectionTestQuery: SELECT 1
+      connection-timeout: 30000
 
 logging:
   file:
