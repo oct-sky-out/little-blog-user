@@ -27,6 +27,7 @@ spring:
     init:
       mode: always
       schema-locations: h2-test-ddl.sql
+      data-locations: h2-test-dml.sql
 
   h2:
     console:
