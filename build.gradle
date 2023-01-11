@@ -13,9 +13,6 @@ repositories {
 }
 
 dependencyManagement {
-	imports {
-		mavenBom 'org.springframework.session:spring-session-bom:2021.1.1'
-	}
 }
 
 dependencies {

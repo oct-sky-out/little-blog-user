@@ -5,6 +5,7 @@ import com.octskyout.users.oauth.repository.OauthUserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @EnableAsync
 @RequiredArgsConstructor
+@Slf4j
 public class AccountDeleteSchedule {
     private final OauthUserRepository oauthUserRepository;
 
@@ -27,6 +29,7 @@ public class AccountDeleteSchedule {
             .atTime(0, 0);
 
         Long threadNumber = Thread.currentThread().getId();
+        log.debug("thread num : {}", threadNumber);
         Pageable pageable = PageRequest.of(threadNumber.intValue(),30);
 
         Page<OauthUser> deleteTargets =
